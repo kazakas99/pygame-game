@@ -1,10 +1,18 @@
 import pygame
 
+def display_score():
+    current_time = pygame.time.get_ticks() - start_time
+    score_surf = font.render(f'{current_time}', False, (64,64,64))
+    score_rect = score_surf.get_rect(center = (400, 50))
+    screen.blit(score_surf, score_rect)
+
 pygame.init()
 screen = pygame.display.set_mode((800, 400))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Game')
 running = True
+game_active = True
+start_time = 0
 
 font = pygame.font.Font('font/Pixeltype.ttf', 50)
 text = font.render('My Game', False, 'Black')
@@ -41,7 +49,7 @@ while running:
     # RENDER YOUR GAME HERE
     screen.blit(background, (0, 0))
 
-    screen.blit(text, text_rect)
+    #screen.blit(text, text_rect)
 
     screen.blit(player, player_rect)
     player_gravity += 1
@@ -62,6 +70,8 @@ while running:
     offset = (snail_rect.x - player_rect.x, snail_rect.y - player_rect.y)
     if player_mask.overlap(snail_mask, offset):
         print('collision!')
+
+    display_score()    
 
     pygame.display.update()
     clock.tick(60)
