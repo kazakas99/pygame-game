@@ -1,7 +1,7 @@
 import pygame
 
 def display_score():
-    current_time = pygame.time.get_ticks() - start_time
+    current_time = (pygame.time.get_ticks() - start_time) // 1000
     score_surf = font.render(f'{current_time}', False, (64,64,64))
     score_rect = score_surf.get_rect(center = (400, 50))
     screen.blit(score_surf, score_rect)
@@ -13,10 +13,11 @@ pygame.display.set_caption('Game')
 running = True
 game_active = True
 start_time = 0
+final_score = 0
 
 font = pygame.font.Font('font/Pixeltype.ttf', 50)
-text = font.render('My Game', False, 'Black')
-text_rect = text.get_rect(center=(400, 50))
+text = font.render('GAME OVER', False, 'Black')
+text_rect = text.get_rect(center=(400, 200))
 
 background = pygame.image.load('background/background.jpg').convert()
 background = pygame.transform.scale(background, screen.get_size())
@@ -35,7 +36,6 @@ snail_mask = pygame.mask.from_surface(snail)
 snail_speed = 4
 player_gravity = -20
 
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -46,32 +46,37 @@ while running:
             if event.key == pygame.K_SPACE and player_rect.bottom >= 328:
                 player_gravity = -20
 
-    # RENDER YOUR GAME HERE
     screen.blit(background, (0, 0))
 
-    #screen.blit(text, text_rect)
+    if game_active:
+        screen.blit(player, player_rect)
+        player_gravity += 1
+        player_rect.y += player_gravity
 
-    screen.blit(player, player_rect)
-    player_gravity += 1
-    player_rect.y += player_gravity
+        if player_rect.bottom >= 328:
+            player_rect.bottom = 328
 
-    if player_rect.bottom >= 328:
-        player_rect.bottom = 328
+        snail_rect.x -= snail_speed
+        if snail_rect.right <= 0:
+            snail_rect.left = 800
+            snail_speed += 1
+            if snail_speed >= 12:
+                snail_speed = 12
 
-    snail_rect.x -= snail_speed
-    if snail_rect.right <= 0:
-        snail_rect.left = 800
-        snail_speed += 1
-        if snail_speed >= 12:
-            snail_speed = 12
+        screen.blit(snail, snail_rect)
 
-    screen.blit(snail, snail_rect)
+        offset = (snail_rect.x - player_rect.x, snail_rect.y - player_rect.y)
+        if player_mask.overlap(snail_mask, offset):
+            final_score = (pygame.time.get_ticks() - start_time) // 1000
+            game_active = False
 
-    offset = (snail_rect.x - player_rect.x, snail_rect.y - player_rect.y)
-    if player_mask.overlap(snail_mask, offset):
-        print('collision!')
-
-    display_score()    
+        display_score()
+    else:
+        screen.blit(text, text_rect)
+        score_text = font.render(f'Your score is: {final_score}', False, 'Black')
+        score_text_rect = score_text.get_rect(center=(400, 250))
+        screen.blit(score_text, score_text_rect)
+        
 
     pygame.display.update()
     clock.tick(60)
